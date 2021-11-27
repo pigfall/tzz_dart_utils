@@ -2,43 +2,64 @@ import 'package:flutter/cupertino.dart';
 
 import 'package:flutter/material.dart';
 
-class ButtonSwitch extends StatefulWidget {
-  bool initedIsOn = false;
-  bool Function(bool isOn) onChanged;
-  ButtonSwitch({
-    Key? key,
-    required this.onChanged,
-    this.initedIsOn = false,
-  }) : super(key: key);
-
-  // This widget is the home page of your application. It is stateful, meaning
-  // that it has a State object (defined below) that contains fields that affect
-  // how it looks.
-
-  // This class is the configuration for the state. It holds the values (in this
-  // case the title) provided by the parent (in this case the App widget) and
-  // used by the build method of the State. Fields in a Widget subclass are
-  // always marked "final".
-
-  @override
-  State<ButtonSwitch> createState() => _ButtonSwitchState(this.initedIsOn);
+enum ButtonSwitchStatus {
+  Off,
+  Switching,
+  On,
 }
 
-class _ButtonSwitchState extends State<ButtonSwitch> {
-  _ButtonSwitchState(bool isOn) {
-    this.isOn = isOn;
+class ButtonSwitch extends StatefulWidget {
+  ButtonSwitchStatus status = ButtonSwitchStatus.Off;
+  final String offDesc;
+  final String switchingDesc;
+  final String onDesc;
+  void Function(ButtonSwitchStatus curStatus, ButtonSwitchState buttonState)
+      onPress;
+
+  ButtonSwitch({
+    //void Function(ButtonSwitchStatus curStatus, ButtonSwitchState buttonState) onPress,
+    required this.onPress,
+    required this.offDesc,
+    required this.switchingDesc,
+    required this.onDesc,
+  });
+
+  @override
+  State<StatefulWidget> createState() {
+    return ButtonSwitchState();
   }
-  bool isOn = false;
+}
+
+class ButtonSwitchState extends State<ButtonSwitch> {
+  changeButtonState(ButtonSwitchStatus status) {
+    setState(() {
+      this.widget.status = status;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
-    return Switch(
-        value: this.isOn,
-        onChanged: (bool isOn) {
-          isOn = this.widget.onChanged(isOn);
-          setState(() {
-            print(isOn);
-            this.isOn = isOn;
-          });
-        });
+    var child = Text("");
+    switch (widget.status) {
+      case ButtonSwitchStatus.Off:
+        child = Text(widget.offDesc);
+        break;
+      case ButtonSwitchStatus.Switching:
+        child = Text(widget.switchingDesc);
+        break;
+      case ButtonSwitchStatus.On:
+        child = Text(widget.onDesc);
+        break;
+    }
+    return Container(
+      alignment: Alignment.center,
+      padding: EdgeInsets.all(32),
+      child: ElevatedButton(
+        onPressed: () {
+          this.widget.onPress(this.widget.status, this);
+        },
+        child: child,
+      ),
+    );
   }
 }
